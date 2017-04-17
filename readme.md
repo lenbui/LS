@@ -1,3 +1,5 @@
 # LS
 
-this is the demo on LS-system
+This is the demo on LS-system.
+
+It is the demo on Fractal.
