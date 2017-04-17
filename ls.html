@@ -1,0 +1,203 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>
+        Demo graph
+    </title>
+    <meta charset="utf-8" />
+</head>
+
+<body>
+    <canvas id="canvas" width="600" height="600" style="border:1px dashed #000000;"></canvas>
+
+    <script>
+        g = document.getElementById("canvas");
+        ctx = g.getContext("2d");
+        ctx.strokeStyle = "blue";
+        ctx.lineWidth = 1;
+
+        function Turtle() {
+        }
+
+        function DrawHexagon(xc, yc, r) {
+            var p = []
+            var alpha = 0
+            // Tinh toa do cac dinh
+            for (var i = 0; i < 6; i++) {
+                p[i] = {
+                    x: r * Math.cos(alpha) + xc,
+                    y: r * Math.sin(alpha) + yc
+                }
+                alpha += Math.PI / 3;
+            }
+            // Ve luc giac deu
+            ctx.beginPath()
+            ctx.moveTo(p[5].x, p[5].y)
+            for (var i = 0; i < 6; i++)
+                ctx.lineTo(p[i].x, p[i].y)
+            ctx.stroke()
+        }
+
+        function DrawPentagon(xc, yc, r) {
+            var p = []
+            var alpha = Math.PI / 2
+            // Tinh toa do cac dinh
+            for (var i = 0; i < 5; i++) {
+                p[i] = {
+                    x: r * Math.cos(alpha) + xc,
+                    y: -r * Math.sin(alpha) + yc
+                }
+                alpha += 2 * Math.PI / 5;
+            }
+            // Ve ngu giac deu
+            ctx.beginPath()
+            ctx.moveTo(p[4].x, p[4].y)
+            for (var i = 0; i < 5; i++)
+                ctx.lineTo(p[i].x, p[i].y)
+            ctx.stroke()
+        }
+
+        function DrawStar(xc, yc, r) {
+            var p = []
+            var rr = r * Math.sin(Math.PI / 10) / Math.sin(7 * Math.PI / 10)
+            var alpha = Math.PI / 2
+            // Tinh toa do cac dinh
+            for (var i = 0; i < 10; i++) {
+                if (i % 2 == 0)
+                    p[i] = {
+                        x: r * Math.cos(alpha) + xc,
+                        y: -r * Math.sin(alpha) + yc
+                    }
+                else
+                    p[i] = {
+                        x: rr * Math.cos(alpha) + xc,
+                        y: -rr * Math.sin(alpha) + yc
+                    }
+                alpha += Math.PI / 5;
+            }
+            // Ve ngoi sao nam canh
+            ctx.beginPath()
+            ctx.moveTo(p[9].x, p[9].y)
+            for (var i = 0; i < 10; i++)
+                ctx.lineTo(p[i].x, p[i].y)
+            ctx.stroke()
+        }
+
+        function DrawVanCock(n, A, B) {
+            if (n <= 1) {
+                // Ve doan thang AB
+                ctx.beginPath()
+                ctx.moveTo(A.x, A.y)
+                ctx.lineTo(B.x, B.y)
+                ctx.stroke()
+            }
+            else {
+                // Tinh toa do C, D, E
+                var C = {}
+                var D = {}
+                var E = {}
+                var DD = {}
+                C.x = (2 * A.x + B.x) / 3
+                C.y = (2 * A.y + B.y) / 3
+                D.x = (A.x + 2 * B.x) / 3
+                D.y = (A.y + 2 * B.y) / 3
+                DD.x = D.x - C.x
+                DD.y = D.y - C.y
+                const cos60 = Math.cos(Math.PI / 3)
+                const sin60 = Math.sin(Math.PI / 3)
+                E.x = DD.x * cos60 - DD.y * sin60 + C.x
+                E.y = DD.x * sin60 + DD.y * cos60 + C.y
+                DrawVanCock(n - 1, A, C)
+                DrawVanCock(n - 1, C, E)
+                DrawVanCock(n - 1, E, D)
+                DrawVanCock(n - 1, D, B)
+            }
+        }
+
+        function DrawMinkowski(n, A, B) {
+
+        }
+
+        function DrawSierpinski(n, A, B, C) {
+            if (n == 1) {
+                // Ve tam giac ABC
+                ctx.beginPath()
+                ctx.moveTo(A.x, A.y)
+                ctx.lineTo(B.x, B.y)
+                ctx.lineTo(C.x, C.y)
+                ctx.lineTo(A.x, A.y)
+                ctx.stroke()
+            }
+            else {
+                // Chia va goi de qui
+                var D = {}
+                var E = {}
+                var F = {}
+                D.x = (B.x + C.x) / 2
+                D.y = (B.y + C.y) / 2
+                E.x = (A.x + C.x) / 2
+                E.y = (A.y + C.y) / 2
+                F.x = (A.x + B.x) / 2
+                F.y = (A.y + B.y) / 2
+                DrawSierpinski(n - 1, A, F, E)
+                DrawSierpinski(n - 1, F, B, D)
+                DrawSierpinski(n - 1, E, D, C)
+            }
+        }
+
+        function forward(turtle) {
+            var dx = turtle.d * Math.cos(turtle.angle)
+            var dy = turtle.d * Math.sin(turtle.angle)
+            ctx.beginPath()
+            ctx.moveTo(turtle.x, turtle.y)
+            turtle.x += dx
+            turtle.y += dy
+            ctx.lineTo(turtle.x, turtle.y)
+            ctx.stroke()
+        }
+
+        function turnLeft(turtle) {
+            turtle.angle += turtle.dangle
+        }
+
+        function turnRight(turtle) {
+            turtle.angle -= turtle.dangle
+        }
+
+        function genLS(n, sp) {
+            if (n == 0) return sp
+            var si = ''
+            for (var i = 0; i < sp.length; i++)
+                switch (sp[i]) {
+                    case 'F': si += 'FF+[+F-F-F]-[-F+F+F]'; break;
+                    default: si += sp[i]; break;
+                }
+            return genLS(n - 1, si);
+        }
+
+        function drawLS(t, s) {
+            var stack = []
+            for (var i = 0; i < s.length; i++) {
+                switch (s[i]) {
+                    case 'F': forward(t); break;
+                    case '+': turnLeft(t); break;
+                    case '-': turnRight(t); break;
+                    case '[': var tt = {}; Object.assign(tt, t); stack.push(tt); break;
+                    case ']': t = stack.pop(); break;
+                }
+            }
+        }
+        
+        var t = { 
+            x: 200.0, 
+            y: 600.0, 
+            angle: -90.0 * Math.PI / 180, 
+            dangle: 22.5 * Math.PI / 180, 
+            d: 10.0 }
+        var s = genLS(4, 'F')        
+        drawLS(t, s)
+    </script>
+</body>
+
+</html>
